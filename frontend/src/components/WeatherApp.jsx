@@ -39,7 +39,7 @@ export default function WeatherApp(){
   async function load(c,co){
     setLoading(true);setError(null);
     try{
-      const url=co?`/api/weather/all?lat=${co.lat}&lon=${co.lon}`:`/api/weather/all?city=${encodeURIComponent(c)}`;
+      const url=co?`https://weatherxxx-backend.onrender.com/api/weather/all?lat=${co.lat}&lon=${co.lon}`:`https://weatherxxx-backend.onrender.com/api/weather/all?city=${encodeURIComponent(c)}`;
       const r=await fetch(url);const j=await r.json();
       if(j.error)throw new Error(j.error);
       setData(j);
@@ -77,7 +77,7 @@ export default function WeatherApp(){
     saved.forEach(async c=>{
       if(previews[c])return;
       try{
-        const r=await fetch(`/api/weather/all?city=${encodeURIComponent(c)}`);
+        const r=await fetch(`https://weatherxxx-backend.onrender.com/api/weather/all?city=${encodeURIComponent(c)}`);
         const j=await r.json();
         if(!j.error)setPreviews(p=>({...p,[c]:j.current}));
       }catch{}
