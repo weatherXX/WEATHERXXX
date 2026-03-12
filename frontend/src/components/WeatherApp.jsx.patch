@@ -1,0 +1,3 @@
+uvIndex: data?.tomorrow?.uvIndex ?? null
+moonrise: data?.moonTimes?.moonrise ?? "N/A"
+moonset: data?.moonTimes?.moonset ?? "N/A"
