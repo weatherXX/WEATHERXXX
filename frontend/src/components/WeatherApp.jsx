@@ -157,7 +157,7 @@ export default function WeatherApp(){
       display:flex;align-items:center;justify-content:space-between;
       padding:0 28px 8px;z-index:100;
     }
-    .nav-btn{background:none;border:none;cursor:pointer;padding:8px;color:rgba(255,255,255,0.65);display:flex;}
+    .nav-btn{background:none;border:none;cursor:pointer;padding:12px;min-width:44px;min-height:44px;color:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;}
     .dots{display:flex;gap:7px;align-items:center;}
     .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.3s;}
     .dot.on{background:white;}
@@ -203,13 +203,13 @@ export default function WeatherApp(){
               <span style={{fontFamily:"Caveat,cursive",fontSize:26,fontWeight:600,color:"white"}}>{w?.name||"..."}</span>
             </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <button style={{background:"none",border:"none",cursor:"pointer",padding:4}} onClick={saveCity}>
+          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={saveCity}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill={isSaved?"#fbbf24":"none"} stroke={isSaved?"#fbbf24":"rgba(255,255,255,0.6)"} strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </button>
-          <button style={{background:"none",border:"none",cursor:"pointer",padding:4}} onClick={()=>setShowCities(true)}>
+          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setShowCities(true)}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </button>
-          <button style={{background:"none",border:"none",cursor:"pointer",padding:4}} onClick={gps}>
+          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={gps}>
             <Navigation size={18} style={{color:"rgba(255,255,255,0.6)"}}/>
           </button>
         </div>
