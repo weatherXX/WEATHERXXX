@@ -398,7 +398,7 @@ export default function WeatherApp(){
           <div style={{marginBottom:20}}>
             <div style={{fontFamily:"Caveat,cursive",fontSize:22,color:"white",fontWeight:600,marginBottom:14}}>Pollen</div>
             <div className="card" style={{padding:"20px",display:"flex",justifyContent:"space-around"}}>
-              {[["Tree",data?.pollen?.tree||"N/A",data?.pollen?.tree==="None"?"rgba(255,255,255,0.2)":data?.pollen?.tree==="Low"?"#4caf50":data?.pollen?.tree==="Moderate"?"#ffeb3b":"#f44336"],["Grass",data?.pollen?.grass||"N/A",data?.pollen?.grass==="None"?"rgba(255,255,255,0.2)":data?.pollen?.grass==="Low"?"#4caf50":data?.pollen?.grass==="Moderate"?"#ffeb3b":"#f44336"],["Ragweed",data?.pollen?.ragweed||"N/A",data?.pollen?.ragweed==="None"?"rgba(255,255,255,0.2)":data?.pollen?.ragweed==="Low"?"#4caf50":data?.pollen?.ragweed==="Moderate"?"#ffeb3b":"#f44336"]].map(([name,val,clr])=>(
+              {[["Tree",data?.pollen?.tree||"N/A",data?.pollen?.tree==="None"?"rgba(255,255,255,0.2)":data?.pollen?.tree==="Low"?"#4caf50":data?.pollen?.tree==="Moderate"?"#ffeb3b":"#f44336"],["Grass",data?.pollen?.grass==="N/A"?"No data":data?.pollen?.grass||"No data",data?.pollen?.grass==="None"?"rgba(255,255,255,0.2)":data?.pollen?.grass==="Low"?"#4caf50":data?.pollen?.grass==="Moderate"?"#ffeb3b":data?.pollen?.grass==="N/A"?"rgba(255,255,255,0.15)":"#f44336"],["Ragweed",data?.pollen?.ragweed==="N/A"?"No data":data?.pollen?.ragweed||"No data",data?.pollen?.ragweed==="None"?"rgba(255,255,255,0.2)":data?.pollen?.ragweed==="Low"?"#4caf50":data?.pollen?.ragweed==="Moderate"?"#ffeb3b":data?.pollen?.ragweed==="N/A"?"rgba(255,255,255,0.15)":"#f44336"]].map(([name,val,clr])=>(
                 <div key={name} style={{textAlign:"center"}}>
                   <svg viewBox="0 0 40 44" width="44" height="48" style={{marginBottom:6}}>
                     <line x1="20" y1="42" x2="20" y2="18" stroke={clr} strokeWidth="2.5" strokeLinecap="round"/>
@@ -486,9 +486,9 @@ export default function WeatherApp(){
             <div className="stat2">
               <div className="lbl"><span>👁️</span> Visibility</div>
               <div style={{fontFamily:"Caveat,cursive",fontSize:13,color:"rgba(255,255,255,0.5)",marginBottom:14}}>
-                {(w.visibility||0)>=8000?"Good right now":"Limited"}
+                {data?.tomorrow?.visibility?data.tomorrow.visibility>=5?"Good right now":"Limited":(w.visibility||0)>=8000?"Good right now":"Limited"}
               </div>
-              <div style={{fontFamily:"Caveat,cursive",fontSize:40,color:"white",fontWeight:600,lineHeight:1}}>{((w.visibility||0)/1000).toFixed(2)}</div>
+              <div style={{fontFamily:"Caveat,cursive",fontSize:40,color:"white",fontWeight:600,lineHeight:1}}>{data?.tomorrow?.visibility?data.tomorrow.visibility.toFixed(1):((w.visibility||0)/1000).toFixed(2)}</div>
               <div style={{fontFamily:"Caveat,cursive",fontSize:20,color:"white",marginTop:4}}>km</div>
             </div>
           </div>
