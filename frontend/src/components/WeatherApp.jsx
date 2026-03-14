@@ -548,6 +548,17 @@ export default function WeatherApp(){
             </div>
           </div>
 
+          {/* ── REPORT DOWNLOAD ── */}
+          <div style={{textAlign:"center",padding:"10px 0 20px"}}>
+            <a href="https://raw.githubusercontent.com/weatherXX/ALL_DOCS/main/WEATHERXXX_Complete_Fix_Report.pdf"
+              target="_blank" rel="noreferrer"
+              style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 20px",borderRadius:16,
+                background:"rgba(37,99,235,0.15)",border:"1px solid rgba(37,99,235,0.3)",
+                color:"rgba(150,190,255,0.8)",fontFamily:"Caveat,cursive",fontSize:16,textDecoration:"none"}}>
+              📄 Download Fix Report
+            </a>
+          </div>
+
           </>)}
         </div>
       </div>
