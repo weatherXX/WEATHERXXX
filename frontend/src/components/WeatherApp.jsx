@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { MapPin, Search, Navigation } from "lucide-react";
 
 const WX_ICON = {
@@ -31,6 +31,7 @@ export default function WeatherApp(){
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState(null);
   const [showSearch,setShowSearch]=useState(false);
+  const [recent,setRecent]=useState(()=>{try{return JSON.parse(localStorage.getItem("wx_recent")||"[]");}catch{return[];}});
   const [showCities,setShowCities]=useState(false);
   const [saved,setSaved]=useState(()=>{try{return JSON.parse(localStorage.getItem("wx_cities")||"[]");}catch{return[];}});
   const [previews,setPreviews]=useState({});
@@ -51,15 +52,20 @@ export default function WeatherApp(){
     setGpsOn(true);
     navigator.geolocation.getCurrentPosition(
       p=>{setCoords({lat:p.coords.latitude,lon:p.coords.longitude});setCity(null);setGpsOn(false);},
-      ()=>{setGpsOn(false);if(!city&&!coords)setCity("Bangalore");},{timeout:10000}
+      ()=>{setGpsOn(false);if(!city&&!coords){setCity("Bangalore");setError("Could not get your location. Showing Bangalore instead.");}},{timeout:10000}
     );
   }
 
   useEffect(()=>{gps();},[]);
-  useEffect(()=>{if(coords)load(null,coords);},[coords]);
-  useEffect(()=>{if(city)load(city,null);},[city]);
+  useEffect(()=>{if(coords)load(null,coords);},[coords,load]);
+  useEffect(()=>{if(city)load(city,null);},[city,load]);
 
-  const doSearch=()=>{if(q.trim()){setCoords(null);setCity(q.trim());setShowSearch(false);setQ("");}};
+  const stars=useMemo(()=>[...Array(55)].map(()=>({
+    w:Math.random()*2+0.5,x:Math.random()*100,y:Math.random()*80,
+    d:Math.random()*3+2,dl:Math.random()*5
+  })),[]);
+
+  const doSearch=()=>{const clean=q.trim().replace(/[<>{}]/g,"").slice(0,100);if(clean){setData(null);setCoords(null);setCity(clean);setShowSearch(false);setQ("");const updated=[clean,...recent.filter(x=>x!==clean)].slice(0,5);setRecent(updated);localStorage.setItem("wx_recent",JSON.stringify(updated));}};
 
   const saveCity=()=>{
     if(!w||saved.includes(w.name))return;
@@ -75,7 +81,6 @@ export default function WeatherApp(){
 
   useEffect(()=>{
     saved.forEach(async c=>{
-      if(previews[c])return;
       try{
         const r=await fetch(`https://weatherxxx-backend.onrender.com/api/weather/all?city=${encodeURIComponent(c)}`);
         const j=await r.json();
@@ -122,7 +127,6 @@ export default function WeatherApp(){
   })();
 
   const css=`
-    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;500;600&display=swap');
     *{box-sizing:border-box;margin:0;padding:0;}
     html,body{height:100%;background:#0a1840;}
     .app{
@@ -184,11 +188,11 @@ export default function WeatherApp(){
 
       {/* Stars */}
       <div className="star-bg">
-        {[...Array(55)].map((_,i)=>(
+        {stars.map((s,i)=>(
           <div key={i} className="st" style={{
-            width:Math.random()*2+0.5+"px",height:Math.random()*2+0.5+"px",
-            left:Math.random()*100+"%",top:Math.random()*80+"%",
-            "--d":Math.random()*3+2+"s","--dl":Math.random()*5+"s"
+            width:s.w+"px",height:s.w+"px",
+            left:s.x+"%",top:s.y+"%",
+            "--d":s.d+"s","--dl":s.dl+"s"
           }}/>
         ))}
       </div>
@@ -216,8 +220,9 @@ export default function WeatherApp(){
           </div>
 
           {error&&(
-            <div style={{padding:16,background:"rgba(239,68,68,0.1)",borderRadius:14,color:"rgba(255,180,180,0.9)",fontFamily:"Caveat,cursive",fontSize:17,marginBottom:14}}>
-              {error}
+            <div style={{padding:16,background:"rgba(239,68,68,0.1)",borderRadius:14,color:"rgba(255,180,180,0.9)",fontFamily:"Caveat,cursive",fontSize:17,marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+              <span>{error}</span>
+              <button onClick={()=>{setError(null);city?load(city,null):load(null,coords);}} style={{background:"rgba(239,68,68,0.2)",border:"1px solid rgba(239,68,68,0.3)",color:"rgba(255,180,180,0.9)",borderRadius:10,padding:"6px 12px",cursor:"pointer",fontFamily:"Caveat,cursive",fontSize:15,flexShrink:0}}>Retry</button>
             </div>
           )}
 
@@ -289,7 +294,7 @@ export default function WeatherApp(){
             </div>
             <div style={{height:1,background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)",marginTop:4}}/>
             <div style={{textAlign:"right",marginTop:6}}>
-              <span style={{fontFamily:"Caveat,cursive",fontSize:14,color:"rgba(150,190,255,0.7)"}}>48-hour forecast &gt;</span>
+              <span style={{fontFamily:"Caveat,cursive",fontSize:14,color:"rgba(150,190,255,0.7)",cursor:"pointer"}} onClick={()=>alert("48-hour forecast coming soon!")}>48-hour forecast &gt;</span>
             </div>
           </div>
 
@@ -310,12 +315,7 @@ export default function WeatherApp(){
 
           {/* ── 7-DAY FORECAST ── */}
           <div className="card" style={{marginTop:14,padding:"6px 16px"}}>
-            {/* Yesterday */}
-            <div className="frow">
-              <span style={{fontFamily:"Caveat,cursive",fontSize:19,color:"rgba(255,255,255,0.7)",width:90,flexShrink:0}}>Yesterday</span>
-              <div style={{flex:1}}/>
-              <span style={{fontFamily:"Caveat,cursive",fontSize:19,color:"rgba(255,255,255,0.7)"}}>{daily[0]?.high}° {daily[0]?.low}°</span>
-            </div>
+
             {daily.map((d,i)=>(
               <div key={i} className="frow">
                 <span style={{fontFamily:"Caveat,cursive",fontSize:19,color:"white",width:70,flexShrink:0}}>{i===0?"Today":d.day}</span>
@@ -327,7 +327,7 @@ export default function WeatherApp(){
               </div>
             ))}
             <div style={{paddingTop:10,paddingBottom:6,textAlign:"right"}}>
-              <span style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(150,190,255,0.75)"}}>15-day forecast &gt;</span>
+              <span style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(150,190,255,0.75)",cursor:"pointer"}} onClick={()=>alert("15-day forecast coming soon!")}>15-day forecast &gt;</span>
             </div>
           </div>
 
@@ -352,13 +352,21 @@ export default function WeatherApp(){
               </div>
             </div>
             <div style={{display:"flex",justifyContent:"space-around"}}>
-              {hourly.slice(0,3).map((h,i)=>(
-                <div key={i} style={{textAlign:"center"}}>
-                  <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:6}}>{h.time}</div>
-                  <div style={{fontSize:26}}>{runScore.e}</div>
-                  <div style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(255,255,255,0.65)",marginTop:4}}>{runScore.l}</div>
-                </div>
-              ))}
+              {hourly.slice(0,3).map((h,i)=>{
+                const hr=data?.forecast?.list?.[i];
+                const ht=hr?hr.main.temp:w.main.temp;
+                const hh=hr?hr.main.humidity:w.main.humidity;
+                const hw=hr?Math.round(hr.wind.speed*3.6):windSpd;
+                const hr2=hr?hr.weather[0].main:w.weather[0].main;
+                const hs=(()=>{if(hr2==="Thunderstorm"||hr2==="Snow")return{e:"😰",l:"Bad"};if(hr2==="Rain"||hr2==="Drizzle")return{e:"😕",l:"Poor"};if(ht>38||ht<5)return{e:"😰",l:"Bad"};if(ht>33||hh>85)return{e:"😐",l:"Fair"};if(hw>40)return{e:"😐",l:"Fair"};if(ht>=15&&ht<=28&&hh<70&&hw<25)return{e:"😊",l:"Great"};return{e:"😊",l:"Good"};})();
+                return(
+                  <div key={i} style={{textAlign:"center"}}>
+                    <div style={{fontSize:11,color:"rgba(255,255,255,0.5)",marginBottom:6}}>{h.time}</div>
+                    <div style={{fontSize:26}}>{hs.e}</div>
+                    <div style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(255,255,255,0.65)",marginTop:4}}>{hs.l}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -366,11 +374,7 @@ export default function WeatherApp(){
           <div style={{marginTop:20}}>
             <div style={{fontFamily:"Caveat,cursive",fontSize:22,color:"white",fontWeight:600,marginBottom:10}}>Radar and maps</div>
             <div style={{borderRadius:18,overflow:"hidden",border:"1px solid rgba(255,255,255,0.1)"}}>
-              <div style={{width:"100%",height:240,background:"#1a3a6e",borderRadius:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8}}><div style={{fontSize:40}}>🗺️</div><div style={{fontFamily:"Caveat,cursive",fontSize:18,color:"rgba(255,255,255,0.7)"}}>Map: {w?.name}, {w?.sys?.country}</div><div style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(255,255,255,0.45)"}}>Lat: {lat.toFixed(2)}° Lon: {lon.toFixed(2)}°</div></div><iframe style={{display:"none"}}
-                title="weather-map"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${lon-3},${lat-3},${lon+3},${lat+3}&layer=mapnik&marker=${lat},${lon}`}
-                style={{width:"100%",height:0,border:"none",display:"none"}}
-              />
+              <div style={{width:"100%",height:240,background:"#1a3a6e",borderRadius:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8}}><div style={{fontSize:40}}>🗺️</div><div style={{fontFamily:"Caveat,cursive",fontSize:18,color:"rgba(255,255,255,0.7)"}}>Map: {w?.name}, {w?.sys?.country}</div><div style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(255,255,255,0.45)"}}>Lat: {lat.toFixed(2)}° Lon: {lon.toFixed(2)}°</div></div>
             </div>
             <div style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(255,255,255,0.55)",marginTop:8}}>Current temperature of {Math.round(w.main.temp)}°</div>
           </div>
@@ -422,7 +426,7 @@ export default function WeatherApp(){
             <div className="stat2">
               <div className="lbl"><span>💧</span> Humidity</div>
               <div style={{fontFamily:"Caveat,cursive",fontSize:14,color:"rgba(255,255,255,0.5)",marginBottom:4}}>
-                {w.main.humidity>60?"Higher than usual":"Lower than yesterday"}
+                {w.main.humidity>=80?"Very humid today":w.main.humidity>=60?"Humid today":w.main.humidity>=40?"Comfortable":"Dry today"}
               </div>
               <div style={{fontFamily:"Caveat,cursive",fontSize:32,color:"white",fontWeight:600}}>{w.main.humidity}%</div>
               <div className="bar-track">
@@ -455,7 +459,7 @@ export default function WeatherApp(){
             </div>
             <div className="stat2">
               <div className="lbl"><span>🌡️</span> Dew Point</div>
-              <div style={{fontFamily:"Caveat,cursive",fontSize:14,color:"rgba(255,255,255,0.5)",marginBottom:10}}>Noticeable humidity</div>
+              <div style={{fontFamily:"Caveat,cursive",fontSize:14,color:"rgba(255,255,255,0.5)",marginBottom:10}}>{dewPoint>=16?"Muggy and uncomfortable":dewPoint>=10?"Noticeable humidity":dewPoint>=0?"Fresh and pleasant":"Very dry air"}</div>
               <div style={{fontFamily:"Caveat,cursive",fontSize:48,color:"white",fontWeight:600,lineHeight:1}}>{dewPoint}°</div>
             </div>
           </div>
@@ -463,7 +467,7 @@ export default function WeatherApp(){
           {/* ── PRESSURE + VISIBILITY ── */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
             <div className="stat2">
-              <div className="lbl"><span>❄️</span> Pressure</div>
+              <div className="lbl"><span>🌬️</span> Pressure</div>
               <div style={{fontFamily:"Caveat,cursive",fontSize:13,color:"rgba(255,255,255,0.5)",marginBottom:4}}>
                 {w.main.pressure>1015?"Currently rising rapidly":w.main.pressure<1005?"Currently falling":"Stable"}
               </div>
@@ -494,7 +498,7 @@ export default function WeatherApp(){
             <div style={{position:"relative",height:88}}>
               <svg viewBox="0 0 340 88" style={{width:"100%",height:"100%"}}>
                 <path d="M20 84 Q170 8 320 84" stroke="rgba(255,255,255,0.1)" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                <path d="M20 84 Q170 8 320 84" stroke="#fbbf24" strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="460" strokeDashoffset="140"/>
+                <path d="M20 84 Q170 8 320 84" stroke="#fbbf24" strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray="460" strokeDashoffset={()=>{const now=Date.now()/1000;const total=w.sys.sunset-w.sys.sunrise;const elapsed=Math.min(Math.max(now-w.sys.sunrise,0),total);return Math.round(460-(elapsed/total)*460);}}/>
                 <circle cx="170" cy="22" r="11" fill="#fbbf24" opacity="0.9"/>
                 <circle cx="170" cy="22" r="20" fill="rgba(251,191,36,0.12)"/>
               </svg>
@@ -591,16 +595,15 @@ export default function WeatherApp(){
             <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:8,overflowY:"auto"}}>
               {saved.map(sc=>{
                 const p=previews[sc];
-                const WX_ICON2={Thunderstorm:"⛈️",Drizzle:"🌦️",Rain:"🌧️",Snow:"❄️",Clear:"☀️",Clouds:"☁️",Mist:"🌫️",Fog:"🌫️",Haze:"🌫️"};
                 return(
                   <div key={sc} style={{display:"flex",alignItems:"center",gap:12,padding:"16px 18px",borderRadius:18,background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",cursor:"pointer",transition:"all 0.2s"}}
-                    onClick={()=>{setCoords(null);setCity(sc);setShowCities(false);}}>
+                    onClick={()=>{setData(null);setCoords(null);setCity(sc);setShowCities(false);}}>
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     <div style={{flex:1}}>
                       <div style={{fontFamily:"Caveat,cursive",fontSize:20,color:"white",fontWeight:600}}>{sc}</div>
                       {p&&<div style={{fontSize:12,color:"rgba(255,255,255,0.4)",textTransform:"capitalize",marginTop:1}}>{p.weather[0].description}</div>}
                     </div>
-                    {p&&<span style={{fontSize:22}}>{WX_ICON2[p.weather[0].main]||"🌤️"}</span>}
+                    {p&&<span style={{fontSize:22}}>{WX_ICON[p.weather[0].main]||"🌤️"}</span>}
                     {p&&<span style={{fontFamily:"Caveat,cursive",fontSize:26,color:"white",fontWeight:600}}>{Math.round(p.main.temp)}°</span>}
                     <button onClick={e=>{e.stopPropagation();removeCity(sc);}} style={{padding:"8px",borderRadius:10,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.15)",color:"rgba(239,68,68,0.65)",cursor:"pointer",display:"flex",marginLeft:4}}>
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -621,6 +624,19 @@ export default function WeatherApp(){
               onKeyDown={e=>e.key==="Enter"&&doSearch()} placeholder="Enter city name..." autoFocus/>
             <button className="go-btn" onClick={doSearch}>Go</button>
           </div>
+          {recent.length>0&&(
+            <div style={{marginTop:8}}>
+              <div style={{fontFamily:"Caveat,cursive",fontSize:15,color:"rgba(255,255,255,0.4)",marginBottom:8}}>Recent searches</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                {recent.map(r=>(
+                  <button key={r} onClick={()=>{setData(null);setCoords(null);setCity(r);setShowSearch(false);setQ("");}}
+                    style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:20,padding:"6px 14px",color:"rgba(255,255,255,0.7)",fontFamily:"Caveat,cursive",fontSize:16,cursor:"pointer"}}>
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <button style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:"14px",color:"rgba(255,255,255,0.7)",fontFamily:"Caveat,cursive",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}
             onClick={()=>{gps();setShowSearch(false);}}>
             <Navigation size={16}/> Use My Current Location

@@ -1,10 +1,23 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Too many requests, please try again later." }
+});
+app.use(limiter);
+
+app.use(cors({
+  origin: [
+    "https://weatherxxx.vercel.app",
+    "http://localhost:3000"
+  ]
+}));
 
 const OWM = process.env.OPENWEATHER_API_KEY;
 const TMW = process.env.TOMORROW_API_KEY;
@@ -15,8 +28,8 @@ app.get("/api/weather/all", async (req, res) => {
     const location = lat && lon ? `lat=${lat}&lon=${lon}` : `q=${encodeURIComponent(city)}`;
 
     const [currentRes, forecastRes] = await Promise.all([
-      axios.get(`https://api.openweathermap.org/data/2.5/weather?${location}&appid=${OWM}&units=metric`),
-      axios.get(`https://api.openweathermap.org/data/2.5/forecast?${location}&appid=${OWM}&units=metric`),
+      axios.get(`https://api.openweathermap.org/data/2.5/weather?${location}&appid=${OWM}&units=metric`,{timeout:8000}),
+      axios.get(`https://api.openweathermap.org/data/2.5/forecast?${location}&appid=${OWM}&units=metric`,{timeout:8000}),
     ]);
 
     const clat = currentRes.data.coord.lat;
@@ -31,7 +44,7 @@ app.get("/api/weather/all", async (req, res) => {
       const tmRes = await axios.get(`https://api.tomorrow.io/v4/weather/realtime?location=${clat},${clon}&fields=${fields}&apikey=${TMW}&units=metric`);
       tomorrow = tmRes.data?.data?.values || null;
     } catch(e) {
-      console.log("Tomorrow.io error:", e.message);
+      console.log("Tomorrow.io error:", e.response?.status || "unknown");
     }
 
     // Open-Meteo pollen (free, no key!)
