@@ -57,8 +57,8 @@ export default function WeatherApp(){
   }
 
   useEffect(()=>{gps();},[]);
-  useEffect(()=>{if(coords)load(null,coords);},[coords,load]);
-  useEffect(()=>{if(city)load(city,null);},[city,load]);
+  useEffect(()=>{if(coords)load(null,coords);},[coords]);
+  useEffect(()=>{if(city)load(city,null);},[city]);
 
   const stars=useMemo(()=>[...Array(55)].map(()=>({
     w:Math.random()*2+0.5,x:Math.random()*100,y:Math.random()*80,
