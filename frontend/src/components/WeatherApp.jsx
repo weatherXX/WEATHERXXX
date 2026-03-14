@@ -132,9 +132,9 @@ export default function WeatherApp(){
     .app{
       min-height:100vh;width:100%;max-width:430px;margin:0 auto;
       background:linear-gradient(180deg,#0d2159 0%,#0f2d6b 20%,#0d246a 50%,#0a1d55 100%);
-      font-family:"Nunito",sans-serif;position:relative;
+      font-family:"Nunito",sans-serif;position:relative;contain:layout style;
     }
-    .star-bg{position:fixed;inset:0;pointer-events:none;max-width:430px;margin:0 auto;}
+    .star-bg{position:fixed;inset:0;pointer-events:none;max-width:430px;margin:0 auto;will-change:opacity;contain:strict;}
     .st{position:absolute;background:white;border-radius:50%;animation:tw var(--d) ease-in-out infinite var(--dl);}
     @keyframes tw{0%,100%{opacity:0.1;}50%{opacity:0.8;}}
     .scroll-area{
@@ -173,7 +173,7 @@ export default function WeatherApp(){
   `;
 
   if(loading) return(
-    <div className="app" style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",flexDirection:"column",gap:16}}>
+    <div className="app" style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",minHeight:"100vh",flexDirection:"column",gap:16}}>
       <style>{css}</style>
       <div style={{fontSize:56,animation:"tw 1.5s ease-in-out infinite"}}>🌙</div>
       <div style={{fontFamily:"Caveat,cursive",fontSize:22,color:"rgba(255,255,255,0.5)"}}>
