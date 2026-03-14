@@ -13,10 +13,17 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use(cors({
-  origin: [
-    "https://weatherxxx.vercel.app",
-    "http://localhost:3000"
-  ]
+  origin: function(origin, callback) {
+    const allowed = [
+      "https://weatherxxx.vercel.app",
+      "http://localhost:3000"
+    ];
+    if(!origin || allowed.some(a => origin.startsWith(a))) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  }
 }));
 
 const OWM = process.env.OPENWEATHER_API_KEY;
