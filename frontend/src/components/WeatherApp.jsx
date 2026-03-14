@@ -207,13 +207,13 @@ export default function WeatherApp(){
               <span style={{fontFamily:"Caveat,cursive",fontSize:26,fontWeight:600,color:"white"}}>{w?.name||"..."}</span>
             </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={saveCity}>
+          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={saveCity} aria-label={isSaved?"Remove from saved cities":"Save city"}>
             <svg viewBox="0 0 24 24" width="20" height="20" fill={isSaved?"#fbbf24":"none"} stroke={isSaved?"#fbbf24":"rgba(255,255,255,0.6)"} strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </button>
-          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setShowCities(true)}>
+          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setShowCities(true)} aria-label="View saved cities">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </button>
-          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={gps}>
+          <button style={{background:"none",border:"none",cursor:"pointer",padding:"12px",minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={gps} aria-label="Use my location">
             <Navigation size={18} style={{color:"rgba(255,255,255,0.6)"}}/>
           </button>
         </div>
@@ -229,7 +229,7 @@ export default function WeatherApp(){
           {w&&(<>
 
           {/* ── HERO ILLUSTRATION ── */}
-          <div style={{height:230,borderRadius:22,overflow:"hidden",marginBottom:0,border:"1px solid rgba(255,255,255,0.07)"}}>
+          <div style={{height:230,minHeight:230,borderRadius:22,overflow:"hidden",marginBottom:0,border:"1px solid rgba(255,255,255,0.07)"}}>
             <svg viewBox="0 0 375 230" style={{width:"100%",height:"100%"}} xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
@@ -554,7 +554,7 @@ export default function WeatherApp(){
 
       {/* ── BOTTOM NAV ── */}
       <div className="nav">
-        <button className="nav-btn" onClick={()=>setShowSearch(true)}>
+        <button className="nav-btn" onClick={()=>setShowSearch(true)} aria-label="Open menu">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6"/>
             <circle cx="17" cy="6" r="3.5" fill="rgba(255,255,255,0.15)"/>
@@ -567,7 +567,7 @@ export default function WeatherApp(){
           <div className="dot"/>
           <div className="dot"/>
         </div>
-        <button className="nav-btn" onClick={()=>setShowSearch(true)}>
+        <button className="nav-btn" onClick={()=>setShowSearch(true)} aria-label="Search city">
           <Search size={22}/>
         </button>
       </div>
